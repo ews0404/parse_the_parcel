@@ -50,16 +50,14 @@ fn main() {
 
     // try to find the smallest package that fits
     for mut p in packages {
-        let mut fits = true;
-
         // borrow checker says we need to sort package dimensions here(why?)
         p.dimensions.sort_unstable();   
         
         // make an iterator that acts on both parcel and Package dimensions
-        let dims = zip(parcel.clone(), p.dimensions);
+        let mut dims = zip(parcel.clone(), p.dimensions);
         
         // check each dimension
-        for d in dims{ fits &= d.0<=d.1; }
+        let fits = dims.all(|d| d.0<=d.1);
 
         // we found a working solution
         if fits {
