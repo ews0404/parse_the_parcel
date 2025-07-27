@@ -2,11 +2,11 @@ use clap::Parser;
 use std::iter::zip;
 
 // settings
-const MAX_WEIGHT_KG:f32 = 25.0;
+const MAX_WEIGHT_KG:u32 = 25;
 
 
 #[derive(Parser, Debug)]
-#[command(version="0.2", about="\n\nwelcome to Eric's parser (better than Matt's)\ndefault units are (cm, kg)", long_about = None)]
+#[command(version, about="\n\ndefault units are (mm, kg)", long_about = None)]
 struct Cli{
     /// height of object
     x:u32,
@@ -18,7 +18,15 @@ struct Cli{
     z:u32,
 
     /// weight of object
-    w:f32,
+    w:u32,
+
+    /// optional length conversion to mm
+    #[arg(long)]
+    to_mm:Option<u32>,
+
+    /// optional weight conversion to kg
+    #[arg(long)]
+    to_kg:Option<u32>
 }
 
 struct Package{
@@ -31,16 +39,32 @@ fn main() {
 
     // parse input values
     let cli = Cli::parse();
-
-    // reject if parcel weighs too much
-    if cli.w>MAX_WEIGHT_KG { 
-        println!("can't ship, {} kg is more than max weight of {} kg!", cli.w, MAX_WEIGHT_KG);
-        return;
-    }
+    println!("cli: {:?}", cli);
 
     // make a parcel with sorted dimensions
     let mut parcel: Vec<u32>= vec![cli.x, cli.y, cli.z];
     parcel.sort_unstable();
+
+    // check for weight conversions
+    let mut weight = cli.w;
+    match cli.to_kg{
+        Some(to_kg)=>{  weight *= to_kg; },
+        None=>{}
+    }
+
+    // check for length conversions
+    match cli.to_mm{
+        Some(to_mm) => { for d in parcel.iter_mut() { *d *= to_mm; } },
+        None => {}
+    }
+
+    println!("parcel: {:?}, weight {}", parcel, weight);
+
+    // reject if parcel weighs too much
+    if weight>MAX_WEIGHT_KG { 
+        println!("can't ship, {} kg is more than max weight of {} kg!", weight, MAX_WEIGHT_KG);
+        return;
+    }
 
     // make a vec of Packages with UNsorted dimensions
     let mut packages = Vec::<Package>::new();
@@ -56,11 +80,11 @@ fn main() {
         // make an iterator that acts on both parcel and Package dimensions
         let mut dims = zip(parcel.clone(), p.dimensions);
         
-        // check each dimension
-        let fits = dims.all(|d| d.0<=d.1);
+        // check that the parcel fits into the Package in every dimension
+        let it_fits = dims.all(|d| d.0<=d.1);
 
-        // we found a working solution
-        if fits {
+        // exit if we found a working solution, else try next Package
+        if it_fits {
             println!("this parcel can ship in a {} container for ${:.2}", p.name, p.cost); 
             return; 
         }
