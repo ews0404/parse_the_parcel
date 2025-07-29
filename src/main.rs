@@ -2,7 +2,7 @@ use clap::Parser;
 use std::iter::zip;
 
 // settings
-const MAX_WEIGHT_KG:u32 = 25;
+const MAX_WEIGHT_KG:f32 = 25.0;
 
 
 #[derive(Parser, Debug)]
@@ -18,15 +18,15 @@ struct Cli{
     z:u32,
 
     /// weight of object
-    w:u32,
+    w:f32,
 
-    /// optional length conversion to mm
+    /// optional coversion factor from your length units to mm
     #[arg(long)]
-    to_mm:Option<u32>,
+    to_mm:Option<f32>,
 
-    /// optional weight conversion to kg
+    /// optional coversion factor from your weight units to kg
     #[arg(long)]
-    to_kg:Option<u32>
+    to_kg:Option<f32>
 }
 
 struct Package{
@@ -54,11 +54,11 @@ fn main() {
 
     // check for length conversions
     match cli.to_mm{
-        Some(to_mm) => { for d in parcel.iter_mut() { *d *= to_mm; } },
+        Some(to_mm) => { for d in parcel.iter_mut() { *d = ( (*d as f32) * (to_mm as f32)) as u32; } },
         None => {}
     }
 
-    println!("parcel: {:?}, weight {}", parcel, weight);
+    println!("parcel: {:?} [mm], weight {} [kg]", parcel, weight);
 
     // reject if parcel weighs too much
     if weight>MAX_WEIGHT_KG { 
