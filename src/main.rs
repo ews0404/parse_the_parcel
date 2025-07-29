@@ -52,7 +52,7 @@ struct Package{
 fn main() {
     // parse input values
     let cli = Cli::parse();
-    println!("cli: {:?}", cli);
+    println!("\n{:?}", cli);
 
     // make a parcel with sorted dimensions
     let mut parcel: Vec<f32>= vec![cli.x, cli.y, cli.z];
@@ -98,14 +98,15 @@ fn main() {
 
         // exit if we found a working solution, else try next Package
         if it_fits {
-            println!("this parcel can ship in a {} container for ${:.2}", p.name, p.shipping_cost); 
+            println!("this parcel can ship in a {} container for ${:.2}\n", p.name, p.shipping_cost); 
             return; 
         }
     }
     
     // we did not find a working package
-    println!("Sorry, we don't have a package that fits the parcel!")
+    println!("Sorry, we don't have a package that fits the parcel!\n")
 
 }
+
 
 
