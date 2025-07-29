@@ -67,7 +67,7 @@ fn main() {
 
     // check for length conversions
     match cli.to_mm{
-        Some(to_mm) => { for d in parcel.iter_mut() { *d = *d * to_mm; } },
+        Some(to_mm) => { for d in parcel.iter_mut() { (*d) = (*d) * to_mm; } },
         None => {}
     }
 
@@ -79,7 +79,7 @@ fn main() {
         return;
     }
 
-    // make a vec of Packages with UNsorted dimensions
+    // make a vec of Packages with UNsorted dimensions [can't just declare this in vec! or sort dimensions in place?]
     let mut packages = Vec::<Package>::new();
     packages.push(Package { name: "small".to_string(),  shipping_cost: 5.00, dimensions_mm: vec![200.0, 300.0, 150.0] });
     packages.push(Package { name: "medium".to_string(), shipping_cost: 7.50, dimensions_mm: vec![300.0, 400.0, 200.0] });
@@ -104,7 +104,7 @@ fn main() {
     }
     
     // we did not find a working package
-    println!("Sorry, we can't ship this!")
+    println!("Sorry, we don't have a package that fits the parcel!")
 
 }
 
