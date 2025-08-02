@@ -1,10 +1,10 @@
 use clap::Parser;
 use std::iter::zip;
 
-mod parcel;
 mod packages;
+mod parcel;
 
-const MAX_WEIGHT_KG:f32 = 25.0;
+const MAX_WEIGHT_KG: f32 = 25.0;
 
 /// contains command line inputs
 #[derive(Parser, Debug)]
@@ -47,19 +47,18 @@ fn f32_is_positive(s: &str) -> Result<f32, String> {
     }
 }
 
-
 fn main() {
-
     // get command line inputs
     let cli = Cli::parse();
     println!("\n{:?}", cli);
     let to_kg = match cli.to_kg {
         Some(x) => x,
-        None => 1.0
+        None => 1.0,
     };
+
     let to_mm = match cli.to_mm {
         Some(x) => x,
-        None => 1.0
+        None => 1.0,
     };
 
     // make a parcel with sorted dimensions
@@ -70,32 +69,35 @@ fn main() {
 
     // reject if parcel weighs too much
     if parcel.weight_kg > MAX_WEIGHT_KG {
-        println!("cannot ship this parcel, {} kg is greater than max allowable weight of {} kg", parcel.weight_kg, MAX_WEIGHT_KG);
+        println!(
+            "cannot ship this parcel, {} kg is greater than max allowable weight of {} kg",
+            parcel.weight_kg, MAX_WEIGHT_KG
+        );
         return;
     }
 
     // try to find the smallest package that fits
     for mut p in packages {
         // borrow checker says we need to sort package dimensions here(why?)
-        p.dimensions_mm.sort_unstable_by(|a,b| a.partial_cmp(b).unwrap());
+        p.dimensions_mm
+            .sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
         // make an iterator that acts on both parcel and Package dimensions
         let mut dims = zip(parcel.dimensions_mm.clone(), p.dimensions_mm);
 
         // check that the parcel fits into the Package in every dimension
-        let it_fits = dims.all(|d| d.0<=d.1);
+        let it_fits = dims.all(|d| d.0 <= d.1);
 
         // exit if we found a working solution, else try next Package
         if it_fits {
-            println!("this parcel can ship in a {} container for ${:.2}\n", p.name, p.shipping_cost); 
-            return; 
+            println!(
+                "this parcel can ship in a {} container for ${:.2}\n",
+                p.name, p.shipping_cost
+            );
+            return;
         }
     }
 
     // we did not find a working package
     println!("Sorry, we don't have a package that fits the parcel!\n")
-    
 }
-
-
-
