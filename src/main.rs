@@ -52,16 +52,17 @@ fn main() {
 
     // get command line inputs
     let cli = Cli::parse();
+    println!("\n{:?}", cli);
     let to_kg = match cli.to_kg {
         Some(x) => x,
-        None => 1.0,
+        None => 1.0
     };
     let to_mm = match cli.to_mm {
         Some(x) => x,
-        None => 1.0,
+        None => 1.0
     };
 
-    // build our parcel, with sorted dimensions
+    // make a parcel with sorted dimensions
     let parcel = parcel::new(cli.x, cli.y, cli.z, cli.w, to_kg, to_mm);
 
     // get a list of available shipping packages
@@ -86,13 +87,15 @@ fn main() {
 
         // exit if we found a working solution, else try next Package
         if it_fits {
-            println!("this parcel can ship in a {} container for ${:.2}", p.name, p.shipping_cost);
-            return;
+            println!("this parcel can ship in a {} container for ${:.2}\n", p.name, p.shipping_cost); 
+            return; 
         }
     }
 
     // we did not find a working package
-    println!("Sorry, we don't have a package that fits the parcel!");
-
+    println!("Sorry, we don't have a package that fits the parcel!\n")
     
 }
+
+
+
