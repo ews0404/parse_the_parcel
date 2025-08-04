@@ -1,7 +1,11 @@
 use clap::Parser;
 use std::iter::zip;
+use config::Config;
+use std::collections::HashMap;
 
-mod packages;
+use crate::package::Package;
+
+mod package;
 mod parcel;
 
 const MAX_WEIGHT_KG: f32 = 25.0;
@@ -48,9 +52,12 @@ fn f32_is_positive(s: &str) -> Result<f32, String> {
 }
 
 fn main() {
+
+    /* 
     // get command line inputs
     let cli = Cli::parse();
     println!("\n{:?}", cli);
+
     let to_kg = match cli.to_kg {
         Some(x) => x,
         None => 1.0,
@@ -63,7 +70,31 @@ fn main() {
 
     // make a parcel with sorted dimensions
     let parcel = parcel::new(cli.x, cli.y, cli.z, cli.w, to_kg, to_mm);
+*/
 
+    let config = Config::builder()
+        .add_source(config::File::with_name("config/config.json"))
+        .build()
+        .unwrap();
+    println!("\n{:?}\n", config);
+
+    let max_weight:f32 = config.get("max_weight").unwrap();
+    println!("max_weight: {}\n", max_weight);
+
+
+    let y = config.get_array("test_arr").unwrap();
+    println!("y: {:?}\n", y);
+
+
+
+    let x = config.get_array("packages").unwrap();
+    println!("x: {:?}", x);
+
+    // for p in config.get_array("packages").unwrap() {
+    //     println!("p: {:?}", p);
+    // }
+
+    /* 
     // get a list of available shipping packages
     let packages = packages::build();
 
@@ -100,4 +131,5 @@ fn main() {
 
     // we did not find a working package
     println!("Sorry, we don't have a package that fits the parcel!\n")
+    */
 }
