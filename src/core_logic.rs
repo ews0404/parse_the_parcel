@@ -2,6 +2,7 @@ use crate::packages::Package;
 use crate::parcel::Parcel;
 use std::iter::zip;
 
+#[derive (Debug, PartialEq)]
 pub enum ShippingType {
     ItFits(String, f32),
     Overweight(f32),
@@ -35,3 +36,39 @@ pub fn find_best_shipping(parcel: Parcel, packages: Vec<Package>, max_weight: f3
     // no packages fit
     return ShippingType::DoesntFit;
 }
+
+
+#[cfg(test)]
+mod tests{
+    use std::vec;
+
+    use super::*;
+    use crate::parcel::Parcel;
+
+    // check for overweight parcel
+    #[test]
+    fn test_overweight(){
+        let max_weight = 100.0;
+        let parcel = Parcel{
+            dimensions_mm:vec!(100.0, 100.0, 100.0), 
+            weight_kg:max_weight+1.0
+        };
+        let mut packages:Vec<Package> = Vec::new();
+        packages.push(Package { name: "test".to_string(), shipping_cost: 1.23, dimensions_mm: parcel.dimensions_mm.clone() });
+
+        assert_eq!(find_best_shipping(parcel, packages, max_weight), ShippingType::Overweight(max_weight+1.0));
+    }
+
+    #[test]
+    fn test_it_fits(){
+        // todo: test case for where a package fits
+        assert!(true);
+    }
+
+    #[test]
+    fn test_doesnt_fit(){
+        // todo: test case for when no package fits
+        assert!(true);
+    }
+}
+

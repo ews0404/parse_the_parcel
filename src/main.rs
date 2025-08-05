@@ -1,12 +1,12 @@
 use crate::packages::Package;
-use crate::stuff::{ShippingType, find_best_shipping};
+use crate::core_logic::{ShippingType, find_best_shipping};
 use clap::Parser;
 use config::Config;
 use serde_derive::Deserialize;
 
 mod packages;
 mod parcel;
-mod stuff;
+mod core_logic;
 
 /// contains command line inputs
 #[derive(Parser, Debug)]
@@ -58,6 +58,7 @@ pub struct Configuration {
 }
 
 fn main() {
+
     println!("\n\n");
 
     // get command line inputs
@@ -72,7 +73,7 @@ fn main() {
     let conf: Configuration = config.try_deserialize().unwrap();
     println!("conf: {:?}", conf);
 
-    // make a parcel with sorted dimensions
+    // make a parcel with converted units and sorted dimensions
     let to_kg = match cli.to_kg {
         Some(x) => x,
         None => 1.0,
@@ -84,10 +85,11 @@ fn main() {
     let parcel = parcel::new(cli.x, cli.y, cli.z, cli.w, to_kg, to_mm);
     println!("parcel: {:?}", parcel);
 
-    // get a list of available shipping packages
+    // get a list of available shipping packages from config file
     let packages = packages::build_from_config(&conf);
 
     // find best shipping method
+    print!("result: ");
     match find_best_shipping(parcel, packages, conf.max_weight) {
         ShippingType::ItFits(name, shipping_cost) => {
             println!(
@@ -105,4 +107,10 @@ fn main() {
             println!("Sorry, we don't have a package that fits the parcel!\n")
         }
     }
+
+    println!("");
+
 }
+
+
+
