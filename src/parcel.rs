@@ -7,7 +7,6 @@ pub struct Parcel {
 
 /// returns Parcel with sorted and scaled dimensions / weight
 pub fn new(x: f32, y: f32, z: f32, w: f32, to_kg: f32, to_mm: f32) -> Parcel {
-    
     // sort the dimensions smallest -> largest
     let mut dims: Vec<f32> = vec![x, y, z];
     dims.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());

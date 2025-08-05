@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use crate::Configuration;
+use serde::Deserialize;
 
 /// holds all information related to one size Package
 #[derive(Debug, Deserialize)]
@@ -11,7 +11,6 @@ pub struct Package {
 
 /// build list of sorted packages from Configuration object
 pub fn build_from_config(conf: &Configuration) -> Vec<Package> {
-    
     let mut retval: Vec<Package> = Vec::new();
 
     for p in conf.packages.iter() {

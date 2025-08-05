@@ -1,11 +1,12 @@
 use crate::packages::Package;
+use crate::stuff::{ShippingType, find_best_shipping};
 use clap::Parser;
 use config::Config;
 use serde_derive::Deserialize;
-use std::iter::zip;
 
 mod packages;
 mod parcel;
+mod stuff;
 
 /// contains command line inputs
 #[derive(Parser, Debug)]
@@ -56,7 +57,6 @@ pub struct Configuration {
     packages: Vec<Package>,
 }
 
-
 fn main() {
     println!("\n\n");
 
@@ -82,41 +82,27 @@ fn main() {
         None => 1.0,
     };
     let parcel = parcel::new(cli.x, cli.y, cli.z, cli.w, to_kg, to_mm);
+    println!("parcel: {:?}", parcel);
 
     // get a list of available shipping packages
     let packages = packages::build_from_config(&conf);
 
-    // reject if parcel weighs too much
-    if parcel.weight_kg > conf.max_weight {
-        println!(
-            "cannot ship this parcel, {} kg is greater than max allowable weight of {} kg",
-            parcel.weight_kg, conf.max_weight
-        );
-        return;
-    }
-
-    // try to find the smallest package that fits
-    for mut p in packages {
-        // borrow checker says we need to sort package dimensions here(why?)
-        p.dimensions_mm
-            .sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-
-        // make an iterator that acts on both parcel and Package dimensions
-        let mut dims = zip(parcel.dimensions_mm.clone(), p.dimensions_mm);
-
-        // check that the parcel fits into the Package in every dimension
-        let it_fits = dims.all(|d| d.0 <= d.1);
-
-        // exit if we found a working solution, else try next Package
-        if it_fits {
+    // find best shipping method
+    match find_best_shipping(parcel, packages, conf.max_weight) {
+        ShippingType::ItFits(name, shipping_cost) => {
             println!(
                 "-> this parcel can ship in a {} container for ${:.2}\n",
-                p.name, p.shipping_cost
+                name, shipping_cost
             );
-            return;
+        }
+        ShippingType::Overweight(w) => {
+            println!(
+                "cannot ship this parcel, {} kg is greater than max allowable weight of {} kg",
+                w, conf.max_weight
+            )
+        }
+        ShippingType::DoesntFit => {
+            println!("Sorry, we don't have a package that fits the parcel!\n")
         }
     }
-
-    // we did not find a working package
-    println!("Sorry, we don't have a package that fits the parcel!\n")
 }
