@@ -1,0 +1,19 @@
+{
+    "max_weight":25.0,
+
+    "packages":[
+        {
+            "name":"small",
+            "shipping_cost":5.00,
+            "dimensions_mm":[ 200.0, 300.0, 150.0 ]
+        },{
+            "name":"medium",
+            "shipping_cost":7.50,
+            "dimensions_mm":[ 300.0, 400.0, 200.0 ]
+        },{
+            "name":"large",
+            "shipping_cost":8.50,
+            "dimensions_mm":[ 400.0, 600.0, 250.0 ]
+        }
+    ]
+}

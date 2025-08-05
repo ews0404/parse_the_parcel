@@ -1,10 +1,11 @@
+use crate::packages::Package;
 use clap::Parser;
+use config::Config;
+use serde_derive::Deserialize;
 use std::iter::zip;
 
 mod packages;
 mod parcel;
-
-const MAX_WEIGHT_KG: f32 = 25.0;
 
 /// contains command line inputs
 #[derive(Parser, Debug)]
@@ -47,31 +48,49 @@ fn f32_is_positive(s: &str) -> Result<f32, String> {
     }
 }
 
+/// holds configuration data from config.json
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
+pub struct Configuration {
+    max_weight: f32,
+    packages: Vec<Package>,
+}
+
+
 fn main() {
+    println!("\n\n");
+
     // get command line inputs
     let cli = Cli::parse();
-    println!("\n{:?}", cli);
+    println!("cli: {:?}", cli);
+
+    // build the configuration from config/config.json
+    let config = Config::builder()
+        .add_source(config::File::with_name("config/config.json"))
+        .build()
+        .unwrap();
+    let conf: Configuration = config.try_deserialize().unwrap();
+    println!("conf: {:?}", conf);
+
+    // make a parcel with sorted dimensions
     let to_kg = match cli.to_kg {
         Some(x) => x,
         None => 1.0,
     };
-
     let to_mm = match cli.to_mm {
         Some(x) => x,
         None => 1.0,
     };
-
-    // make a parcel with sorted dimensions
     let parcel = parcel::new(cli.x, cli.y, cli.z, cli.w, to_kg, to_mm);
 
     // get a list of available shipping packages
-    let packages = packages::build();
+    let packages = packages::build_from_config(&conf);
 
     // reject if parcel weighs too much
-    if parcel.weight_kg > MAX_WEIGHT_KG {
+    if parcel.weight_kg > conf.max_weight {
         println!(
             "cannot ship this parcel, {} kg is greater than max allowable weight of {} kg",
-            parcel.weight_kg, MAX_WEIGHT_KG
+            parcel.weight_kg, conf.max_weight
         );
         return;
     }
@@ -91,7 +110,7 @@ fn main() {
         // exit if we found a working solution, else try next Package
         if it_fits {
             println!(
-                "this parcel can ship in a {} container for ${:.2}\n",
+                "-> this parcel can ship in a {} container for ${:.2}\n",
                 p.name, p.shipping_cost
             );
             return;
